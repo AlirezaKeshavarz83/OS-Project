@@ -131,34 +131,42 @@ int main(int argc, char* argv[]) {
     ll min_time_stamp = memory_accesses.front().time_stamp;
     ll max_time_stamp = memory_accesses.back().time_stamp;
 
-    cout << "Minimum timestamp: " << min_time_stamp << endl;
-    cout << "Maximum timestamp: " << max_time_stamp << endl;
+    cout << "Minimum timestamp: " << 0 << endl;
+    cout << "Maximum timestamp: " << max_time_stamp - min_time_stamp << endl;
 
-    /*ll start_time, end_time;
+    ll start_time, end_time;
     cout << "Enter a start time: ";
     cin >> start_time;
+    if (cin.fail()) {
+        cerr << "Invalid start time." << endl;
+        return 1;
+    }
     cout << "Enter an end time: ";
-    cin >> end_time;*/
-    /*ll start_time = min_time_stamp;
-    ll end_time = max_time_stamp;
+    cin >> end_time;
+    if (cin.fail()) {
+        cerr << "Invalid end time." << endl;
+        return 1;
+    }
+
+    start_time += min_time_stamp;
+    end_time += min_time_stamp;
 
     vector<MemoryAccess> filtered_accesses;
     for (auto access : memory_accesses) {
         if (start_time <= access.time_stamp && access.time_stamp <= end_time) {
             filtered_accesses.push_back(access);
         }
-    }*/
+    }
 
 
-    /*cout << "Enter cache size: ";
+    cout << "Enter cache size: ";
     int cache_size;
     cin >> cache_size;
     
     if (cin.fail() || cache_size <= 0) {
         cerr << "Invalid cache size." << endl;
         return 1;
-    }*/
-    int cache_size = 10000;
+    }
 
 
     if(algoType == "lru"){
@@ -166,7 +174,14 @@ int main(int argc, char* argv[]) {
 
         processMemoryAccesses(cache, memory_accesses);
     } else if(algoType == "nhit"){
-        N_Hit_Implementation cache(cache_size, 3);
+        int insertion_threshold;
+        cout << "Enter Insertion Threshold: ";
+        cin >> insertion_threshold;
+        if (cin.fail()) {
+            cerr << "Invalid Insertion Threshold." << endl;
+            return 1;
+        }
+        N_Hit_Implementation cache(cache_size, insertion_threshold);
         
         processMemoryAccesses(cache, memory_accesses);
     } else if(algoType == "arc"){

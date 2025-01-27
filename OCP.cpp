@@ -195,14 +195,25 @@ int main(int argc, char* argv[]) {
     ll min_time_stamp = memory_accesses.front().time_stamp;
     ll max_time_stamp = memory_accesses.back().time_stamp;
 
-    cout << "Minimum timestamp: " << min_time_stamp << endl;
-    cout << "Maximum timestamp: " << max_time_stamp << endl;
+    cout << "Minimum timestamp: " << 0 << endl;
+    cout << "Maximum timestamp: " << max_time_stamp - min_time_stamp << endl;
 
     ll start_time, end_time;
     cout << "Enter a start time: ";
     cin >> start_time;
+    if (cin.fail()) {
+        cerr << "Invalid start time." << endl;
+        return 1;
+    }
     cout << "Enter an end time: ";
     cin >> end_time;
+    if (cin.fail()) {
+        cerr << "Invalid end time." << endl;
+        return 1;
+    }
+
+    start_time += min_time_stamp;
+    end_time += min_time_stamp;
 
     vector<MemoryAccess> filtered_accesses;
     for (auto access : memory_accesses) {
