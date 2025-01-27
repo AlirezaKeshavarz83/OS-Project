@@ -64,6 +64,8 @@ vector<MemoryAccess> read_csv(const string& filename) {
     return sequence;
 }
 
+bool outputJSON;
+
 // Process the memory accesses through a given cache
 void processMemoryAccesses(CacheManager& cacheManager, const vector<MemoryAccess>& accesses) {
     int readHitCount = 0;
@@ -105,6 +107,32 @@ void processMemoryAccesses(CacheManager& cacheManager, const vector<MemoryAccess
         cout << "Cache Hit Rate: " << (100.0 * totalCacheHit / totalRequests) << "%" << endl;
         cout << "Cache Miss Rate: " << (100.0 * totalCacheMiss / totalRequests) << "%" << endl;
     }
+
+    if(outputJSON){
+        std::ofstream outFile("output.json");
+
+        // Output JSON formatted data to file
+        if (outFile.is_open()) {
+            outFile << std::fixed << std::setprecision(1);
+            outFile << "{" << std::endl;
+            outFile << "  \"TotalReadHit\": " << readHitCount << "," << std::endl;
+            outFile << "  \"TotalReadMiss\": " << readMissCount << "," << std::endl;
+            outFile << "  \"TotalWriteHit\": " << writeHitCount << "," << std::endl;
+            outFile << "  \"TotalWriteMiss\": " << writeMissCount << "," << std::endl;
+            outFile << "  \"TotalWriteRequests\": " << totalWriteRequests << "," << std::endl;
+            outFile << "  \"TotalReadRequests\": " << totalReadRequests << "," << std::endl;
+            outFile << "  \"TotalRequests\": " << totalRequests << "," << std::endl;
+            outFile << "  \"TotalCacheHit\": " << totalCacheHit << "," << std::endl;
+            outFile << "  \"TotalCacheMiss\": " << totalCacheMiss << "," << std::endl;
+            outFile << "  \"CacheHitRate\": " << (100.0 * totalCacheHit / totalRequests) << "," << std::endl;
+            outFile << "  \"CacheMissRate\": " << (100.0 * totalCacheMiss / totalRequests) << std::endl;
+            outFile << "}" << std::endl;
+            outFile.close();
+            cout << "Data written to output.json" << std::endl;
+        } else {
+            cerr << "Unable to open file for writing." << std::endl;
+        }
+    }
 }
 
 int main(int argc, char* argv[]) {
@@ -138,6 +166,10 @@ int main(int argc, char* argv[]) {
 
     for (int i = 3; i < argc; ++i) {
         string arg = argv[i];
+
+        if (arg == "--output-json"){
+            outputJSON = 1;
+        }
 
         if (arg.find("--start-time=") == 0) {
             if(arg == "--start-time=min") start_time = min_time_stamp;

@@ -11,8 +11,8 @@ private:
     int p; // Adaptive parameter
 
     // Lists to store pages
-    std::list<ll> T1, T2; 
-    std::list<ll> B1, B2; 
+    std::list<ll> T1, T2;
+    std::list<ll> B1, B2;
 
     // Maps to store iterators for quick lookup
     std::unordered_map<ll, std::list<ll>::iterator> inT1, inT2;

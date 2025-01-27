@@ -47,6 +47,8 @@ unordered_map<long long int, vector<int>> preprocess_future_occurrences(const ve
     return future_occurrences;
 }
 
+bool outputJSON;
+
 // Function to simulate the optimal cache replacement algorithm using std::set
 void optimal_cache_replacement_with_set(int cache_size, const vector<long long int> &sequence, int piece_count) {
     multiset<pair<int, long long int>, CompareNextUse> cache;  // Cache uses a custom comparator for decreasing order
@@ -118,6 +120,25 @@ void optimal_cache_replacement_with_set(int cache_size, const vector<long long i
         cout << "Cache Miss Rate: " << (100.0 * cache_misses / (int)sequence.size()) << "%" << endl;
     }
 
+    if(outputJSON){
+        std::ofstream outFile("output.json");
+
+        // Output JSON formatted data to file
+        if (outFile.is_open()) {
+            outFile << std::fixed << std::setprecision(1);
+            outFile << "{" << std::endl;
+            outFile << "  \"TotalRequests\": " << sequence.size() << "," << std::endl;
+            outFile << "  \"TotalCacheHit\": " << sequence.size() - cache_misses << "," << std::endl;
+            outFile << "  \"TotalCacheMiss\": " << cache_misses << "," << std::endl;
+            outFile << "  \"CacheHitRate\": " << (100.0 * (sequence.size() - cache_misses ) / (int)sequence.size()) << "," << std::endl;
+            outFile << "  \"CacheMissRate\": " << (100.0 * cache_misses / (int)sequence.size()) << std::endl;
+            outFile << "}" << std::endl;
+            outFile.close();
+            cout << "Data written to output.json" << std::endl;
+        } else {
+            cerr << "Unable to open file for writing." << std::endl;
+        }
+    }
 }
 
 // Reads CSV file; returns a list of MemoryAccess
@@ -198,6 +219,10 @@ int main(int argc, char* argv[]) {
 
     for (int i = 2; i < argc; ++i) {
         string arg = argv[i];
+
+        if (arg == "--output-json"){
+            outputJSON = 1;
+        }
 
         if (arg.find("--start-time=") == 0) {
             if(arg == "--start-time=min") start_time = min_time_stamp;
