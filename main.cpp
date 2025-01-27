@@ -131,25 +131,60 @@ int main(int argc, char* argv[]) {
     ll min_time_stamp = memory_accesses.front().time_stamp;
     ll max_time_stamp = memory_accesses.back().time_stamp;
 
-    cout << "Minimum timestamp: " << 0 << endl;
-    cout << "Maximum timestamp: " << max_time_stamp - min_time_stamp << endl;
+    ll start_time = -1;
+    ll end_time = -1;
+    int cache_size = -1;
+    int insertion_threshold = -1;
 
-    ll start_time, end_time;
-    cout << "Enter a start time: ";
-    cin >> start_time;
-    if (cin.fail()) {
-        cerr << "Invalid start time." << endl;
-        return 1;
-    }
-    cout << "Enter an end time: ";
-    cin >> end_time;
-    if (cin.fail()) {
-        cerr << "Invalid end time." << endl;
-        return 1;
+    for (int i = 3; i < argc; ++i) {
+        string arg = argv[i];
+
+        if (arg.find("--start-time=") == 0) {
+            if(arg == "--start-time=min") start_time = min_time_stamp;
+            else start_time = stoll(arg.substr(13)) + min_time_stamp;
+        } else if (arg.find("--end-time=") == 0) {
+            if(arg == "--end-time=max") end_time = max_time_stamp;
+            else end_time = stoll(arg.substr(11)) + min_time_stamp;
+        } else if (arg.find("--cache-size=") == 0) {
+            cache_size = stoi(arg.substr(13));
+        } else if (arg.find("--threshold=") == 0) {
+            insertion_threshold = stoi(arg.substr(12));
+        }
     }
 
-    start_time += min_time_stamp;
-    end_time += min_time_stamp;
+    if(start_time == -1 || end_time == -1){
+        cout << "Minimum timestamp: " << 0 << endl;
+        cout << "Maximum timestamp: " << max_time_stamp - min_time_stamp << endl;
+    }
+
+    if (start_time == -1) {
+        cout << "Enter a start time: ";
+        cin >> start_time;
+        if (cin.fail()) {
+            cerr << "Invalid start time." << endl;
+            return 1;
+        }
+        start_time += min_time_stamp;
+    }
+
+    if (end_time == -1) {
+        cout << "Enter an end time: ";
+        cin >> end_time;
+        if (cin.fail()) {
+            cerr << "Invalid end time." << endl;
+            return 1;
+        }
+        end_time += min_time_stamp;
+    }
+
+    if (cache_size == -1) {
+        cout << "Enter cache size: ";
+        cin >> cache_size;
+        if (cin.fail() || cache_size <= 0) {
+            cerr << "Invalid cache size." << endl;
+            return 1;
+        }
+    }
 
     vector<MemoryAccess> filtered_accesses;
     for (auto access : memory_accesses) {
@@ -158,40 +193,26 @@ int main(int argc, char* argv[]) {
         }
     }
 
-
-    cout << "Enter cache size: ";
-    int cache_size;
-    cin >> cache_size;
-    
-    if (cin.fail() || cache_size <= 0) {
-        cerr << "Invalid cache size." << endl;
-        return 1;
-    }
-
-
     if(algoType == "lru"){
         LRU_Implementation cache(cache_size);
-
-        processMemoryAccesses(cache, memory_accesses);
+        processMemoryAccesses(cache, filtered_accesses);
     } else if(algoType == "nhit"){
-        int insertion_threshold;
-        cout << "Enter Insertion Threshold: ";
-        cin >> insertion_threshold;
-        if (cin.fail()) {
-            cerr << "Invalid Insertion Threshold." << endl;
-            return 1;
+        if(insertion_threshold == -1){
+            cout << "Enter Insertion Threshold: ";
+            cin >> insertion_threshold;
+            if (cin.fail()) {
+                cerr << "Invalid Insertion Threshold." << endl;
+                return 1;
+            }
         }
         N_Hit_Implementation cache(cache_size, insertion_threshold);
-        
-        processMemoryAccesses(cache, memory_accesses);
+        processMemoryAccesses(cache, filtered_accesses);
     } else if(algoType == "arc"){
         ARC_Implementation cache(cache_size);
-        
-        processMemoryAccesses(cache, memory_accesses);
+        processMemoryAccesses(cache, filtered_accesses);
     } else if(algoType == "larc"){
         LARC_Implementation cache(cache_size);
-        
-        processMemoryAccesses(cache, memory_accesses);
+        processMemoryAccesses(cache, filtered_accesses);
     }
     
 
