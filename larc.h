@@ -14,7 +14,7 @@ private:
 
 public:
     LARC_Implementation(int capacity);
-    int access(ll offset) override;
+    int access(ll index) override;
 };
 
 #endif

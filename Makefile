@@ -1,12 +1,15 @@
 # Makefile - Single runner, cleaning up object files immediately after build
 
 CXX = g++
-CXXFLAGS = -std=c++11 -O2 -Wall
+CXXFLAGS = -std=c++17 -O2 -Wall
 
 OBJS = main.o cache_manager.o lru.o nhit.o arc.o larc.o
 
-all: cache_runner
+all: cache_runner ocp
 	@rm -f $(OBJS)
+
+ocp: ocp.cpp
+	$(CXX) $(CXXFLAGS) -o oracle ocp.cpp
 
 cache_runner: $(OBJS)
 	$(CXX) $(CXXFLAGS) -o cache_runner $(OBJS)

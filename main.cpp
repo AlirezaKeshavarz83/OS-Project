@@ -42,7 +42,7 @@ vector<MemoryAccess> read_csv(const string& filename) {
         }
 
         ll time_stamp = 0;
-        ll offset = 0;
+        ll index = 0;
         string type = "Read";
         try {
             time_stamp = stoll(values[0]);
@@ -51,14 +51,14 @@ vector<MemoryAccess> read_csv(const string& filename) {
             continue;
         }
         try {
-            offset = stoll(values[2]);
+            index = stoll(values[2]);
         } catch (const invalid_argument&) {
-            cerr << "Warning: Invalid offset in: " << line << endl;
+            cerr << "Warning: Invalid index in: " << line << endl;
             continue;
         }
         type = values[4];
 
-        sequence.push_back(MemoryAccess(time_stamp, offset, type));
+        sequence.push_back(MemoryAccess(time_stamp, index, type));
     }
     file.close();
     return sequence;
@@ -72,7 +72,7 @@ void processMemoryAccesses(CacheManager& cacheManager, const vector<MemoryAccess
     int writeMissCount = 0;
 
     for (const auto& access : accesses) {
-        int result = cacheManager.access(access.offset);
+        int result = cacheManager.access(access.index);
         // result == 1 -> miss, 0 -> hit
         if (result) {
             if (access.type == MemoryAccess::Write) writeMissCount++;

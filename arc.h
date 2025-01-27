@@ -22,7 +22,7 @@ private:
 
 public:
     ARC_Implementation(int capacity);
-    int access(ll offset) override;
+    int access(ll index) override;
 };
 
 #endif

@@ -1,13 +1,4 @@
-#include <iostream>
-#include <vector>
-#include <unordered_map>
-#include <set>
-#include <climits>
-#include <algorithm>
-#include <unordered_set>
-#include <fstream>
-#include <sstream>
-#include <string>
+#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -15,15 +6,13 @@ typedef long long ll;
 
 struct MemoryAccess {
     ll time_stamp;
-    ll offset;
+    ll index;
     enum AccessType {
         Read,
         Write
     } type;
 
-   MemoryAccess(ll _time_stamp, ll _offset, string _type) {
-    time_stamp = _time_stamp;
-        offset = _offset;
+   MemoryAccess(ll time_stamp, ll index, string _type) : time_stamp(time_stamp), index(index) {
         if (_type == "Write") {
             type = Write;
         } else {
@@ -69,8 +58,8 @@ void optimal_cache_replacement_with_set(int cache_size, const vector<long long i
         unordered_map<long long int, vector<int>> future_occurrences = preprocess_future_occurrences(sequence, piece_count, j);
 
         // Simulate page requests
-        for (int i = 0; i < sequence.size() / piece_count; ++i) {
-            long long int page = sequence[(sequence.size() / piece_count) * j + i];
+        for (int i = 0; i < (int)sequence.size() / piece_count; ++i) {
+            long long int page = sequence[((int)sequence.size() / piece_count) * j + i];
             future_occurrences[page].pop_back();
 
             int next_use = future_occurrences[page].size() > 1 ? future_occurrences[page].back() : INT_MAX;
@@ -79,7 +68,7 @@ void optimal_cache_replacement_with_set(int cache_size, const vector<long long i
                 // Cache miss
                 cache_misses++;
 
-                if (cache.size() == cache_size) {
+                if ((int)cache.size() == cache_size) {
                     // Evict the page with the biggest "next use" (i.e., the one at the beginning)
                     auto it = cache.begin();
                     if (it->first > next_use) {
@@ -121,6 +110,14 @@ void optimal_cache_replacement_with_set(int cache_size, const vector<long long i
     cout << "Total out misses: " << out_misses << endl;
     cout << "Total cold misses: " << cold_misses << endl;
     cout << "Total hits: " << sequence.size() - cache_misses << endl;
+    cout << endl;
+    
+    if ((int)sequence.size() > 0) {
+        cout << fixed << setprecision(1);
+        cout << "Cache Hit Rate: " << (100.0 * (sequence.size() - cache_misses ) / (int)sequence.size()) << "%" << endl;
+        cout << "Cache Miss Rate: " << (100.0 * cache_misses / (int)sequence.size()) << "%" << endl;
+    }
+
 }
 
 // Reads CSV file; returns a list of MemoryAccess
@@ -156,7 +153,7 @@ vector<MemoryAccess> read_csv(const string& filename) {
         }
 
         ll time_stamp = 0;
-        ll offset = 0;
+        ll index = 0;
         string type = "Read";
         try {
             time_stamp = stoll(values[0]);
@@ -165,14 +162,14 @@ vector<MemoryAccess> read_csv(const string& filename) {
             continue;
         }
         try {
-            offset = stoll(values[2]);
+            index = stoll(values[2]);
         } catch (const invalid_argument&) {
-            cerr << "Warning: Invalid offset in: " << line << endl;
+            cerr << "Warning: Invalid index in: " << line << endl;
             continue;
         }
         type = values[4];
 
-        sequence.push_back(MemoryAccess(time_stamp, offset, type));
+        sequence.push_back(MemoryAccess(time_stamp, index, type));
     }
     file.close();
     return sequence;
@@ -233,7 +230,7 @@ int main(int argc, char* argv[]) {
 
     vector<long long int> sequence;
     for(auto access : filtered_accesses){
-        sequence.push_back(access.offset);
+        sequence.push_back(access.index);
     }
 
     if (sequence.empty()) {

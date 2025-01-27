@@ -8,12 +8,12 @@
 class LRU_Implementation : public CacheManager {
 private:
     int cache_size;
-    std::list<ll> lruList; 
-    std::unordered_map<ll, std::list<ll>::iterator> cacheMap;
+    std::list<ll> lru_list;
+    std::unordered_map<ll, std::list<ll>::iterator> in_cache;
 
 public:
     LRU_Implementation(int cache_size);
-    int access(ll offset) override;
+    int access(ll index) override;
 };
 
 #endif
