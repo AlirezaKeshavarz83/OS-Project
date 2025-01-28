@@ -64,6 +64,7 @@ vector<MemoryAccess> read_csv(const string& filename) {
     return sequence;
 }
 
+bool batch;
 bool outputJSON;
 
 // Process the memory accesses through a given cache
@@ -90,6 +91,12 @@ void processMemoryAccesses(CacheManager& cacheManager, const vector<MemoryAccess
     int totalRequests = totalReadRequests + totalWriteRequests;
     int totalCacheHit = readHitCount + writeHitCount;
     int totalCacheMiss = readMissCount + writeMissCount;
+
+    if(batch){
+        cerr << fixed << setprecision(1);
+        cerr << (100.0 * totalCacheHit / totalRequests) << "\n";
+        return;
+    }
 
     cout << "Total Read Hit: " << readHitCount << endl;
     cout << "Total Read Miss: " << readMissCount << endl;
@@ -135,6 +142,39 @@ void processMemoryAccesses(CacheManager& cacheManager, const vector<MemoryAccess
     }
 }
 
+
+void run_batch(const vector<MemoryAccess> &memory_accesses, ll min_time_stamp){
+    string algoType;
+    int cache_size;
+    ll start_time, end_time;
+    while (cin >> algoType >> cache_size >> start_time >> end_time) {
+        start_time += min_time_stamp;
+        end_time += min_time_stamp;
+        vector<MemoryAccess> filtered_accesses;
+        for (auto access : memory_accesses) {
+            if (start_time <= access.time_stamp && access.time_stamp <= end_time) {
+                filtered_accesses.push_back(access);
+            }
+        }
+
+        if(algoType == "lru"){
+            LRU_Implementation cache(cache_size);
+            processMemoryAccesses(cache, filtered_accesses);
+        } else if(algoType == "nhit"){
+            ll insertion_threshold;
+            cin >> insertion_threshold;
+            N_Hit_Implementation cache(cache_size, insertion_threshold);
+            processMemoryAccesses(cache, filtered_accesses);
+        } else if(algoType == "arc"){
+            ARC_Implementation cache(cache_size);
+            processMemoryAccesses(cache, filtered_accesses);
+        } else if(algoType == "larc"){
+            LARC_Implementation cache(cache_size);
+            processMemoryAccesses(cache, filtered_accesses);
+        }
+    }
+}
+
 int main(int argc, char* argv[]) {
     if (argc < 3) {
         cerr << "Usage: " << argv[0] << " <algorithm> <filename>" << endl;
@@ -145,10 +185,11 @@ int main(int argc, char* argv[]) {
     string algoType = argv[1];
     string filename = argv[2];
 
-    if(algoType != "lru" && algoType != "nhit" && algoType != "arc" && algoType != "larc"){
+    if(algoType != "lru" && algoType != "nhit" && algoType != "arc" && algoType != "larc" && algoType != "batch"){
         cerr << "Invalid Algorithm." << endl;
         return 0;
     }
+    if(algoType == "batch") batch = 1;
 
     auto memory_accesses = read_csv(filename);
     if (memory_accesses.empty()) {
@@ -182,6 +223,11 @@ int main(int argc, char* argv[]) {
         } else if (arg.find("--threshold=") == 0) {
             insertion_threshold = stoi(arg.substr(12));
         }
+    }
+
+    if(batch){
+        run_batch(memory_accesses, min_time_stamp);
+        return 0;
     }
 
     if(start_time == -1 || end_time == -1){

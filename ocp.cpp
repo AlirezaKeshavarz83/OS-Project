@@ -48,6 +48,7 @@ unordered_map<long long int, vector<int>> preprocess_future_occurrences(const ve
 }
 
 bool outputJSON;
+bool batch;
 
 // Function to simulate the optimal cache replacement algorithm using std::set
 void optimal_cache_replacement_with_set(int cache_size, const vector<long long int> &sequence, int piece_count) {
@@ -105,6 +106,12 @@ void optimal_cache_replacement_with_set(int cache_size, const vector<long long i
                 cache_map[page] = insert_it;  // Update the iterator in cache_map
             }
         }
+    }
+
+    if(batch){
+        cerr << fixed << setprecision(1);
+        cerr << (100.0 * (sequence.size() - cache_misses ) / (int)sequence.size()) << endl;
+        return;
     }
 
     // Print statistics
@@ -196,6 +203,33 @@ vector<MemoryAccess> read_csv(const string& filename) {
     return sequence;
 }
 
+void run_batch(const vector<MemoryAccess> &memory_accesses, ll min_time_stamp){
+    int cache_size;
+    ll start_time, end_time;
+    while (cin >> cache_size >> start_time >> end_time) {
+        start_time += min_time_stamp;
+        end_time += min_time_stamp;
+        vector<MemoryAccess> filtered_accesses;
+        for (auto access : memory_accesses) {
+            if (start_time <= access.time_stamp && access.time_stamp <= end_time) {
+                filtered_accesses.push_back(access);
+            }
+        }
+        vector<long long int> sequence;
+        for(auto access : filtered_accesses){
+            sequence.push_back(access.index);
+        }
+
+        if (sequence.empty()) {
+            cerr << "No valid data found in the first column." << endl;
+            return;
+        }
+        int piece_count = 1;
+
+        optimal_cache_replacement_with_set(cache_size, sequence, piece_count);
+    }
+}
+
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         cerr << "Usage: " << argv[0] << " <filename>" << endl;
@@ -223,6 +257,9 @@ int main(int argc, char* argv[]) {
         if (arg == "--output-json"){
             outputJSON = 1;
         }
+        if(arg == "--batch"){
+            batch = 1;
+        }
 
         if (arg.find("--start-time=") == 0) {
             if(arg == "--start-time=min") start_time = min_time_stamp;
@@ -233,6 +270,11 @@ int main(int argc, char* argv[]) {
         } else if (arg.find("--cache-size=") == 0) {
             cache_size = stoi(arg.substr(13));
         }
+    }
+
+    if(batch){
+        run_batch(memory_accesses, min_time_stamp);
+        return 0;
     }
 
     if(start_time == -1 || end_time == -1){
